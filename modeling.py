@@ -89,9 +89,11 @@ def modeling_page():
     st.markdown("<hr>", unsafe_allow_html=True)
     st.subheader("🎯 Analisis Algoritma")
 
+    # 👉 DEFAULT = Random Forest (BIAR FEATURE IMPORTANCE LANGSUNG MUNCUL)
     model_choice = st.selectbox(
         "Pilih algoritma untuk dianalisis:",
-        list(models.keys())
+        list(models.keys()),
+        index=list(models.keys()).index("Random Forest")
     )
 
     pipe = Pipeline([
@@ -157,6 +159,43 @@ def modeling_page():
     st.plotly_chart(fig, use_container_width=True)
 
     # =====================================================
+    # FEATURE IMPORTANCE (AMAN & KONSISTEN)
+    # =====================================================
+    if model_choice in ["Decision Tree", "Random Forest", "Gradient Boosting"]:
+        st.subheader("📌 Feature Importance")
+
+        importances = pipe.named_steps["model"].feature_importances_
+        fi_df = pd.DataFrame({
+            "Feature": X.columns,
+            "Importance": importances
+        }).sort_values("Importance", ascending=False)
+
+        fig = px.bar(
+            fi_df.head(10),
+            x="Importance",
+            y="Feature",
+            orientation="h",
+            title="Top 10 Feature Importance (Tertinggi → Terendah)"
+        )
+        fig.update_layout(
+            yaxis=dict(categoryorder="total ascending"),
+            height=450
+        )
+        st.plotly_chart(fig, use_container_width=True)
+
+        with st.expander("🧠 Interpretasi Feature Importance"):
+            st.markdown("""
+- Fitur dengan nilai importance tertinggi memiliki pengaruh paling besar terhadap prediksi.
+- Informasi ini membantu interpretasi model pada domain kesehatan maupun lingkungan.
+- Feature importance juga dapat digunakan untuk feature selection pada pengembangan lanjutan.
+""")
+    else:
+        st.info(
+            "Feature Importance hanya tersedia untuk algoritma berbasis tree "
+            "(Decision Tree, Random Forest, dan Gradient Boosting)."
+        )
+
+    # =====================================================
     # KOMPARASI SEMUA MODEL
     # =====================================================
     st.markdown("<hr>", unsafe_allow_html=True)
@@ -186,7 +225,7 @@ def modeling_page():
     result_df = pd.DataFrame(results)
 
     # =====================================================
-    # PRIORITY TIE-BREAKER (AMAN SIDANG)
+    # PRIORITY TIE-BREAKER (BIAR TERPILIH 1 MODEL)
     # =====================================================
     priority_order = {
         "Random Forest": 1,
@@ -216,7 +255,7 @@ def modeling_page():
     )
 
     # =====================================================
-    # MODEL TERBAIK (FINAL & 1 SAJA)
+    # MODEL TERBAIK (FINAL)
     # =====================================================
     best = result_df.iloc[0]
 
@@ -228,8 +267,8 @@ def modeling_page():
     Model <b>{best['Model']}</b> dipilih sebagai model terbaik karena memiliki
     nilai <b>F1-score ({best['F1']:.3f})</b> dan <b>ROC–AUC ({best['AUC']:.3f})</b>
     tertinggi.  
-    Pada kondisi nilai evaluasi yang sama, model dipilih berdasarkan
-    <i>prioritas stabilitas dan generalisasi</i>.
+    Jika terdapat nilai evaluasi yang sama, pemilihan model dilakukan
+    berdasarkan prioritas stabilitas dan kemampuan generalisasi.
   </div>
 </div>
 """,
@@ -239,9 +278,8 @@ def modeling_page():
     with st.expander("🧠 Interpretasi & Langkah Kerja Model Terbaik"):
         st.markdown(f"""
 **Interpretasi:**  
-Model **{best['Model']}** dipilih karena menunjukkan performa konsisten
-dengan kemampuan generalisasi yang lebih baik, sehingga aman digunakan
-sebagai sistem pendukung keputusan.
+Model **{best['Model']}** memberikan performa yang stabil dan seimbang antara
+Precision dan Recall, sehingga layak digunakan sebagai sistem pendukung keputusan.
 
 **Langkah Kerja Model:**
 1. Dataset dibagi menjadi data latih dan data uji.
