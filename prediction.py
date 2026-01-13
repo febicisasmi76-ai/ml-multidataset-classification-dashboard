@@ -9,7 +9,21 @@ from data_loader import load_and_prepare
 # PREDICTION PAGE (BEST MODEL ONLY)
 # =========================================================
 def prediction_page():
-    st.header("🔮 Prediction & Recommendation (Best Model)")
+    # ===== REVISI 1: JUDUL APLIKASI =====
+    st.header("🩺 Aplikasi Prediksi Kanker Payudara")
+
+    st.markdown("""
+<div class="card" style="background:#F8FAFC;border-left:6px solid #DC2626;">
+  <h4>Berbasis Machine Learning</h4>
+  <div class="smallMuted">
+    Aplikasi ini memprediksi kondisi <b>jinak (benign)</b> atau
+    <b>ganas (malignant)</b> pada kanker payudara.
+    <br><br>
+    <i>Catatan: Pendekatan klasifikasi yang digunakan bersifat umum
+    dan dapat dikembangkan untuk dataset lain dengan karakteristik serupa.</i>
+  </div>
+</div>
+""", unsafe_allow_html=True)
 
     uploaded = st.session_state.get("uploaded_file")
     mode = st.session_state.get("dataset_mode", "Auto Detect")
@@ -23,6 +37,14 @@ def prediction_page():
 
     if pack is None or "error" in pack:
         st.error(pack.get("error", "Gagal memproses dataset."))
+        return
+
+    # ===== REVISI 2: KUNCI DATASET KE KESEHATAN =====
+    if pack["meta"]["dataset_type"] != "health":
+        st.error(
+            "Halaman prediksi ini khusus untuk dataset kesehatan "
+            "(Kanker Payudara). Dataset lain dapat digunakan pada tahap modeling."
+        )
         return
 
     if trained_pack is None:
@@ -93,10 +115,10 @@ def prediction_page():
         if pred == 1:
             st.markdown(
                 f"""
-<div class="card" style="background:linear-gradient(135deg,#16A34A,#22C55E);color:white;">
-  <h2 style="margin:0;">✅ {label}</h2>
+<div class="card" style="background:linear-gradient(135deg,#DC2626,#EF4444);color:white;">
+  <h2 style="margin:0;">⚠️ {label}</h2>
   <div style="margin-top:8px;font-size:18px;">
-    Model mendeteksi kondisi <b>positif</b>.
+    Model memprediksi kondisi <b>GANAS</b> dan berisiko tinggi.
   </div>
   <div style="margin-top:8px;">
     <b>Confidence:</b> {prob:.2f}%
@@ -108,10 +130,10 @@ def prediction_page():
         else:
             st.markdown(
                 f"""
-<div class="card" style="background:linear-gradient(135deg,#DC2626,#EF4444);color:white;">
-  <h2 style="margin:0;">⚠️ {label}</h2>
+<div class="card" style="background:linear-gradient(135deg,#16A34A,#22C55E);color:white;">
+  <h2 style="margin:0;">✅ {label}</h2>
   <div style="margin-top:8px;font-size:18px;">
-    Model mendeteksi kondisi <b>negatif / berisiko</b>.
+    Model memprediksi kondisi <b>JINAK</b> dan relatif aman.
   </div>
   <div style="margin-top:8px;">
     <b>Confidence:</b> {prob:.2f}%
@@ -126,11 +148,10 @@ def prediction_page():
         # =================================================
         st.markdown("<br>", unsafe_allow_html=True)
 
-        if meta["dataset_type"] == "health":
-            st.markdown("### 🩺 Rekomendasi Tindakan (Kesehatan)")
+        st.markdown("### 🩺 Rekomendasi Tindakan (Kesehatan)")
 
-            if pred == 1:
-                st.markdown("""
+        if pred == 1:
+            st.markdown("""
 <div class="card">
   <ul>
     <li>Segera lakukan konsultasi dengan dokter atau tenaga medis.</li>
@@ -139,8 +160,8 @@ def prediction_page():
   </ul>
 </div>
 """, unsafe_allow_html=True)
-            else:
-                st.markdown("""
+        else:
+            st.markdown("""
 <div class="card">
   <ul>
     <li>Tetap lakukan pemeriksaan rutin secara berkala.</li>
@@ -150,40 +171,9 @@ def prediction_page():
 </div>
 """, unsafe_allow_html=True)
 
-            st.markdown("""
+        st.markdown("""
 <div class="card" style="background:#F1F5F9;">
 ⚠️ <b>Catatan:</b> Sistem ini merupakan <b>Decision Support System</b> dan
 tidak menggantikan keputusan medis profesional.
-</div>
-""", unsafe_allow_html=True)
-
-        else:
-            st.markdown("### 🌿 Rekomendasi Tindakan (Lingkungan)")
-
-            if pred == 1:
-                st.markdown("""
-<div class="card">
-  <ul>
-    <li>Kualitas udara relatif aman untuk aktivitas harian.</li>
-    <li>Tetap waspada bagi kelompok sensitif (asma, lansia, anak-anak).</li>
-    <li>Jaga kualitas udara dalam ruangan.</li>
-  </ul>
-</div>
-""", unsafe_allow_html=True)
-            else:
-                st.markdown("""
-<div class="card">
-  <ul>
-    <li>Kurangi aktivitas luar ruangan.</li>
-    <li>Gunakan masker jika harus beraktivitas di luar.</li>
-    <li>Kelompok rentan sebaiknya tetap berada di dalam ruangan.</li>
-  </ul>
-</div>
-""", unsafe_allow_html=True)
-
-            st.markdown("""
-<div class="card" style="background:#F1F5F9;">
-⚠️ <b>Catatan:</b> Rekomendasi ini bersifat panduan umum
-berdasarkan hasil prediksi model.
 </div>
 """, unsafe_allow_html=True)
