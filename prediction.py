@@ -9,7 +9,9 @@ from data_loader import load_and_prepare
 # PREDICTION PAGE (BEST MODEL ONLY)
 # =========================================================
 def prediction_page():
-    # ===== REVISI 1: JUDUL APLIKASI =====
+    # =====================================================
+    # JUDUL APLIKASI
+    # =====================================================
     st.header("🩺 Aplikasi Prediksi Kanker Payudara")
 
     st.markdown("""
@@ -19,8 +21,8 @@ def prediction_page():
     Aplikasi ini memprediksi kondisi <b>jinak (benign)</b> atau
     <b>ganas (malignant)</b> pada kanker payudara.
     <br><br>
-    <i>Catatan: Pendekatan klasifikasi yang digunakan bersifat umum
-    dan dapat dikembangkan untuk dataset lain dengan karakteristik serupa.</i>
+    <i>Pendekatan klasifikasi yang digunakan bersifat umum dan
+    dapat dikembangkan untuk dataset lain.</i>
   </div>
 </div>
 """, unsafe_allow_html=True)
@@ -39,11 +41,13 @@ def prediction_page():
         st.error(pack.get("error", "Gagal memproses dataset."))
         return
 
-    # ===== REVISI 2: KUNCI DATASET KE KESEHATAN =====
+    # =====================================================
+    # KUNCI DATASET: HANYA KESEHATAN
+    # =====================================================
     if pack["meta"]["dataset_type"] != "health":
         st.error(
             "Halaman prediksi ini khusus untuk dataset kesehatan "
-            "(Kanker Payudara). Dataset lain dapat digunakan pada tahap modeling."
+            "(Kanker Payudara). Dataset lain digunakan pada tahap modeling."
         )
         return
 
@@ -99,10 +103,14 @@ def prediction_page():
         # prediksi kelas
         pred = int(model.predict(input_df)[0])
 
-        # probabilitas (jika tersedia)
+        # probabilitas (AMAN UNTUK SEMUA MODEL)
         prob = None
         if hasattr(model, "predict_proba"):
-            prob = float(model.predict_proba(input_df)[0][pred]) * 100
+            try:
+                proba = model.predict_proba(input_df)
+                prob = float(proba[0][pred]) * 100
+            except Exception:
+                prob = None
 
         label = meta["positive_label"] if pred == 1 else meta["negative_label"]
 
@@ -112,7 +120,10 @@ def prediction_page():
         st.markdown("<hr>", unsafe_allow_html=True)
         st.subheader("📌 Hasil Prediksi")
 
+        confidence_text = f"{prob:.2f}%" if prob is not None else "N/A"
+
         if pred == 1:
+            # GANAS → MERAH
             st.markdown(
                 f"""
 <div class="card" style="background:linear-gradient(135deg,#DC2626,#EF4444);color:white;">
@@ -121,13 +132,14 @@ def prediction_page():
     Model memprediksi kondisi <b>GANAS</b> dan berisiko tinggi.
   </div>
   <div style="margin-top:8px;">
-    <b>Confidence:</b> {prob:.2f}%
+    <b>Confidence:</b> {confidence_text}
   </div>
 </div>
 """,
                 unsafe_allow_html=True
             )
         else:
+            # JINAK → HIJAU
             st.markdown(
                 f"""
 <div class="card" style="background:linear-gradient(135deg,#16A34A,#22C55E);color:white;">
@@ -136,7 +148,7 @@ def prediction_page():
     Model memprediksi kondisi <b>JINAK</b> dan relatif aman.
   </div>
   <div style="margin-top:8px;">
-    <b>Confidence:</b> {prob:.2f}%
+    <b>Confidence:</b> {confidence_text}
   </div>
 </div>
 """,
@@ -147,7 +159,6 @@ def prediction_page():
         # REKOMENDASI TINDAKAN (DSS)
         # =================================================
         st.markdown("<br>", unsafe_allow_html=True)
-
         st.markdown("### 🩺 Rekomendasi Tindakan (Kesehatan)")
 
         if pred == 1:
