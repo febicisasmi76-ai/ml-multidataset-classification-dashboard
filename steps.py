@@ -27,69 +27,64 @@ def steps_page():
     )
 
     st.markdown("<hr>", unsafe_allow_html=True)
-
     st.markdown("### 🧠 Alur Tiap Algoritma (Klik untuk lihat detail)")
 
     with st.expander("1) Logistic Regression — langkah kerja"):
         st.markdown(
             """
-- Tentukan fungsi sigmoid untuk memetakan probabilitas kelas  
-- Optimasi parameter (gradient descent / solver)  
-- Model output: probabilitas → threshold (umumnya 0.5) → kelas  
-- Kelebihan: interpretasi jelas, baseline kuat  
-- Kelemahan: kurang menangkap pola non-linear kompleks  
+- Menginisialisasi parameter bobot dan bias  
+- Menggunakan fungsi sigmoid untuk memetakan nilai ke probabilitas  
+- Menghitung loss (log-loss)  
+- Melakukan optimasi parameter menggunakan metode iteratif  
+- Menghasilkan probabilitas kelas dan menentukan kelas berdasarkan threshold  
 """
         )
 
     with st.expander("2) KNN — langkah kerja"):
         st.markdown(
             """
-- Tentukan nilai **k** (jumlah tetangga)  
-- Hitung jarak data baru ke data training (mis. Euclidean)  
-- Ambil k tetangga terdekat → voting mayoritas  
-- Kelebihan: sederhana, efektif pada pola lokal  
-- Kelemahan: sensitif skala fitur (wajib scaling), lambat jika data besar  
+- Menentukan nilai **k** (jumlah tetangga terdekat)  
+- Menghitung jarak antara data uji dan data latih  
+- Memilih k data dengan jarak terdekat  
+- Menentukan kelas berdasarkan voting mayoritas tetangga  
 """
         )
 
     with st.expander("3) SVM — langkah kerja"):
         st.markdown(
             """
-- Cari hyperplane pemisah terbaik antar kelas  
-- Gunakan margin maksimum untuk generalisasi  
-- Jika non-linear: gunakan kernel (RBF/Poly)  
-- Kelebihan: kuat untuk klasifikasi  
-- Kelemahan: butuh tuning kernel/parameter, bisa berat komputasi  
+- Menentukan dan mencari nilai bobot (w1, w2, ..., wn) serta bias  
+- Melakukan optimasi bobot untuk memaksimalkan margin  
+- Menentukan hyperplane pemisah terbaik antar kelas  
+- Menggunakan margin sebagai dasar generalisasi model  
 """
         )
 
     with st.expander("4) Decision Tree — langkah kerja"):
         st.markdown(
             """
-- Memilih fitur terbaik untuk split (Gini/Entropy)  
-- Membentuk node hingga kondisi berhenti (depth/min_samples)  
-- Kelebihan: mudah dipahami, menangkap non-linear  
-- Kelemahan: mudah overfitting jika tidak dibatasi  
+- Memilih fitur terbaik sebagai pemisah data  
+- Melakukan proses split berdasarkan kriteria tertentu  
+- Membentuk node dan cabang hingga kondisi berhenti tercapai  
+- Menghasilkan struktur pohon keputusan untuk klasifikasi  
 """
         )
 
     with st.expander("5) Random Forest — langkah kerja"):
         st.markdown(
             """
-- Membuat banyak decision tree (bagging)  
-- Tiap tree dilatih dari sampel acak data + subset fitur acak  
-- Prediksi akhir = voting mayoritas  
-- Kelebihan: stabil, biasanya performa tinggi  
-- Kelemahan: interpretasi lebih sulit, butuh komputasi lebih  
+- Membuat beberapa subset data secara acak  
+- Melatih banyak decision tree secara independen  
+- Setiap tree melakukan prediksi kelas  
+- Menentukan hasil akhir berdasarkan voting mayoritas  
 """
         )
 
-    with st.expander("6) Gradient Boosting (opsional untuk lingkungan) — langkah kerja"):
+    with st.expander("6) Gradient Boosting — langkah kerja"):
         st.markdown(
             """
-- Melatih tree kecil bertahap (sequential)  
-- Setiap model baru memperbaiki error model sebelumnya  
-- Kelebihan: sangat kuat untuk pola kompleks/noisy (sering bagus untuk data lingkungan)  
-- Kelemahan: sensitif parameter, bisa overfitting jika tidak dituning  
+- Melatih model secara bertahap (sequential)  
+- Setiap model baru mempelajari kesalahan model sebelumnya  
+- Menggabungkan seluruh model untuk menghasilkan prediksi akhir  
 """
         )
